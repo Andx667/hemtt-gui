@@ -1,8 +1,15 @@
 from __future__ import annotations
 import os
+import re
 import subprocess
 import threading
 from typing import Callable, Optional
+
+
+def strip_ansi_codes(text: str) -> str:
+    """Remove ANSI escape sequences from text."""
+    ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+    return ansi_escape.sub('', text)
 
 
 def build_command(hemtt_executable: str, args: list[str]) -> list[str]:
@@ -56,7 +63,14 @@ class CommandRunner:
     def _run(self):
         self.is_running = True
         try:
-            # Use universal_newlines/text True for str output
+            # Prepare environment to disable color output from HEMTT
+            run_env = self.env.copy() if self.env else os.environ.copy()
+            # Force NO_COLOR to disable ANSI color codes
+            run_env['NO_COLOR'] = '1'
+            # Also set other common env vars that disable colors
+            run_env['TERM'] = 'dumb'
+            
+            # Use universal_newlines/text True for str output with UTF-8 encoding
             self.process = subprocess.Popen(
                 self.command,
                 cwd=self.cwd or None,
@@ -65,13 +79,17 @@ class CommandRunner:
                 text=True,
                 bufsize=1,
                 universal_newlines=True,
-                env=self.env,
+                encoding='utf-8',
+                errors='replace',
+                env=run_env,
             )
             assert self.process.stdout is not None
             for line in self.process.stdout:
                 if line is None:
                     break
-                self.on_output(line)
+                # Strip ANSI escape codes before sending to output
+                clean_line = strip_ansi_codes(line)
+                self.on_output(clean_line)
                 if self._cancel_requested:
                     break
             # Ensure process completed

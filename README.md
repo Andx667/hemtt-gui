@@ -32,7 +32,6 @@ Enter additional arguments exactly as you would after `hemtt` on the CLI. Exampl
 
 ```text
 validate
-package --dry-run --verbose
 ```
  
 Then press Run.
@@ -73,7 +72,6 @@ Trigger it by publishing a new Release in GitHub (or run manually via the Action
 ## Limitations / Future Improvements
 
 - No progress bar (HEMTT doesn't emit structured progress; could parse lines heuristically).
-- No semantic parsing of errors; could highlight error lines.
 - Could support a list of favorite custom commands.
 - Could integrate a settings dialog and log file export.
 - Add dark theme toggle.
