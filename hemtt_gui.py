@@ -119,7 +119,9 @@ class HemttGUI(tk.Tk):
         opts_row1 = ttk.Frame(opts_frame)
         opts_row1.pack(fill=tk.X, pady=2)
         self.verbose_var = tk.BooleanVar(value=False)
-        self.verbose_check = ttk.Checkbutton(opts_row1, text="Verbose (-v)", variable=self.verbose_var)
+        self.verbose_check = ttk.Checkbutton(
+            opts_row1, text="Verbose (-v)", variable=self.verbose_var
+        )
         self.verbose_check.pack(side=tk.LEFT, padx=(0, 8))
         self.pedantic_var = tk.BooleanVar(value=False)
         self.pedantic_check = ttk.Checkbutton(
@@ -147,7 +149,9 @@ class HemttGUI(tk.Tk):
         opts_row2.pack(fill=tk.X, pady=2)
         ttk.Label(opts_row2, text="Threads (-t):").pack(side=tk.LEFT, padx=(0, 4))
         self.threads_var = tk.StringVar()
-        threads_spinbox = ttk.Spinbox(opts_row2, from_=1, to=32, textvariable=self.threads_var, width=5)
+        threads_spinbox = ttk.Spinbox(
+            opts_row2, from_=1, to=32, textvariable=self.threads_var, width=5
+        )
         threads_spinbox.pack(side=tk.LEFT, padx=(0, 12))
 
         ttk.Label(opts_row2, text="Optional addons (-o):").pack(side=tk.LEFT, padx=(0, 4))
@@ -223,8 +227,8 @@ class HemttGUI(tk.Tk):
         # Try to use a theme that supports better customization
         # 'clam' theme works well on all platforms and allows better color control
         available_themes = self.style.theme_names()
-        if 'clam' in available_themes:
-            self.style.theme_use('clam')
+        if "clam" in available_themes:
+            self.style.theme_use("clam")
 
         self.light_theme = {
             "bg": "#f0f0f0",
@@ -294,7 +298,9 @@ class HemttGUI(tk.Tk):
     def _browse_arma3(self):
         """Open a file dialog to select the Arma 3 executable and persist path."""
         initial = self.arma3_var.get()
-        initialdir = os.path.dirname(initial) if initial and os.path.isfile(initial) else os.getcwd()
+        initialdir = (
+            os.path.dirname(initial) if initial and os.path.isfile(initial) else os.getcwd()
+        )
         path = filedialog.askopenfilename(
             title="Select Arma 3 executable",
             initialdir=initialdir,
@@ -584,7 +590,9 @@ class HemttGUI(tk.Tk):
                     return None
         return hemtt, proj
 
-    def _run(self, args: list[str], supports_pedantic: bool = True, supports_build_opts: bool = False):
+    def _run(
+        self, args: list[str], supports_pedantic: bool = True, supports_build_opts: bool = False
+    ):
         """Start running a HEMTT command with optional flags.
 
         Parameters
@@ -748,9 +756,9 @@ class LaunchDialog(tk.Toplevel):
         self.profile_var = tk.StringVar(value="default")
         profile_entry = ttk.Entry(profile_frame, textvariable=self.profile_var, width=30)
         profile_entry.grid(row=0, column=1, sticky=tk.EW, pady=2, padx=(5, 0))
-        ttk.Label(profile_frame, text="(leave 'default' for default profile)", font=("TkDefaultFont", 8)).grid(
-            row=1, column=1, sticky=tk.W, pady=(0, 5), padx=(5, 0)
-        )
+        ttk.Label(
+            profile_frame, text="(leave 'default' for default profile)", font=("TkDefaultFont", 8)
+        ).grid(row=1, column=1, sticky=tk.W, pady=(0, 5), padx=(5, 0))
 
         profile_frame.columnconfigure(1, weight=1)
 
@@ -759,23 +767,27 @@ class LaunchDialog(tk.Toplevel):
         options_frame.pack(fill=tk.X, padx=10, pady=5)
 
         self.quick_var = tk.BooleanVar(value=False)
-        ttk.Checkbutton(options_frame, text="Quick launch (--quick, skip build)", variable=self.quick_var).pack(
-            anchor=tk.W, pady=2
-        )
+        ttk.Checkbutton(
+            options_frame, text="Quick launch (--quick, skip build)", variable=self.quick_var
+        ).pack(anchor=tk.W, pady=2)
 
         self.no_filepatching_var = tk.BooleanVar(value=False)
         ttk.Checkbutton(
-            options_frame, text="Disable file patching (--no-filepatching)", variable=self.no_filepatching_var
+            options_frame,
+            text="Disable file patching (--no-filepatching)",
+            variable=self.no_filepatching_var,
         ).pack(anchor=tk.W, pady=2)
 
         self.binarize_var = tk.BooleanVar(value=False)
-        ttk.Checkbutton(options_frame, text="Binarize files (--binarize)", variable=self.binarize_var).pack(
-            anchor=tk.W, pady=2
-        )
+        ttk.Checkbutton(
+            options_frame, text="Binarize files (--binarize)", variable=self.binarize_var
+        ).pack(anchor=tk.W, pady=2)
 
         self.all_optionals_var = tk.BooleanVar(value=False)
         ttk.Checkbutton(
-            options_frame, text="Include all optionals (--all-optionals)", variable=self.all_optionals_var
+            options_frame,
+            text="Include all optionals (--all-optionals)",
+            variable=self.all_optionals_var,
         ).pack(anchor=tk.W, pady=2)
 
         # Executable
@@ -785,20 +797,22 @@ class LaunchDialog(tk.Toplevel):
         self.executable_var = tk.StringVar(value=default_arma3_exec)
         exec_entry = ttk.Entry(exec_frame, textvariable=self.executable_var, width=20)
         exec_entry.pack(side=tk.LEFT, padx=5)
-        ttk.Label(exec_frame, text="(optional, e.g. arma3profiling_x64)", font=("TkDefaultFont", 8)).pack(
-            side=tk.LEFT
-        )
+        ttk.Label(
+            exec_frame, text="(optional, e.g. arma3profiling_x64)", font=("TkDefaultFont", 8)
+        ).pack(side=tk.LEFT)
 
         # Instances
         inst_frame = ttk.Frame(options_frame)
         inst_frame.pack(fill=tk.X, pady=2)
         ttk.Label(inst_frame, text="Instances:").pack(side=tk.LEFT)
         self.instances_var = tk.StringVar(value="1")
-        inst_spinbox = ttk.Spinbox(inst_frame, from_=1, to=10, textvariable=self.instances_var, width=5)
-        inst_spinbox.pack(side=tk.LEFT, padx=5)
-        ttk.Label(inst_frame, text="(number of game instances to launch)", font=("TkDefaultFont", 8)).pack(
-            side=tk.LEFT
+        inst_spinbox = ttk.Spinbox(
+            inst_frame, from_=1, to=10, textvariable=self.instances_var, width=5
         )
+        inst_spinbox.pack(side=tk.LEFT, padx=5)
+        ttk.Label(
+            inst_frame, text="(number of game instances to launch)", font=("TkDefaultFont", 8)
+        ).pack(side=tk.LEFT)
 
         # Optional addons
         optional_frame = ttk.Frame(options_frame)
@@ -807,9 +821,9 @@ class LaunchDialog(tk.Toplevel):
         self.optional_var = tk.StringVar()
         optional_entry = ttk.Entry(optional_frame, textvariable=self.optional_var, width=30)
         optional_entry.pack(side=tk.LEFT, padx=5)
-        ttk.Label(optional_frame, text="(comma-separated, e.g. compat,extra)", font=("TkDefaultFont", 8)).pack(
-            side=tk.LEFT
-        )
+        ttk.Label(
+            optional_frame, text="(comma-separated, e.g. compat,extra)", font=("TkDefaultFont", 8)
+        ).pack(side=tk.LEFT)
 
         # Additional arguments
         extra_frame = ttk.LabelFrame(self, text="Additional Arguments", padding=10)
@@ -829,7 +843,9 @@ class LaunchDialog(tk.Toplevel):
         btn_frame = ttk.Frame(self, padding=10)
         btn_frame.pack(fill=tk.X)
 
-        ttk.Button(btn_frame, text="Launch", command=self._on_launch).pack(side=tk.RIGHT, padx=(5, 0))
+        ttk.Button(btn_frame, text="Launch", command=self._on_launch).pack(
+            side=tk.RIGHT, padx=(5, 0)
+        )
         ttk.Button(btn_frame, text="Cancel", command=self._on_cancel).pack(side=tk.RIGHT)
 
         # Center dialog on parent
