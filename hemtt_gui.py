@@ -43,6 +43,21 @@ class HemttGUI(tk.Tk):
 
     def _build_ui(self):
         """Create and lay out all UI widgets."""
+        # Winget install/update frame (top-most)
+        winget_frame = ttk.Frame(self, padding=(8, 8))
+        winget_frame.pack(fill=tk.X)
+        self.btn_install_hemtt = ttk.Button(
+            winget_frame,
+            text="Install HEMTT (winget)",
+            command=self._install_hemtt,
+        )
+        self.btn_update_hemtt = ttk.Button(
+            winget_frame,
+            text="Update HEMTT (winget)",
+            command=self._update_hemtt,
+        )
+        self.btn_install_hemtt.pack(side=tk.LEFT, padx=(0, 8))
+        self.btn_update_hemtt.pack(side=tk.LEFT)
         # Top frame for paths
         top = ttk.Frame(self, padding=8)
         top.pack(fill=tk.X)
@@ -546,6 +561,8 @@ class HemttGUI(tk.Tk):
             self.btn_utils_fnl,
             self.btn_ln_sort,
             self.btn_ln_coverage,
+            self.btn_install_hemtt,
+            self.btn_update_hemtt,
             self.btn_custom,
             self.custom_entry,
             self.verbose_check,
@@ -719,6 +736,40 @@ class HemttGUI(tk.Tk):
         args = [a for a in extra.split(" ") if a]
         # Pedantic (-p) is only supported for build, check, dev, release
         self._run(args, supports_pedantic=False)
+
+    def _install_hemtt(self):
+        """Install HEMTT via winget (BrettMayson.HEMTT)."""
+        self._run_winget(["install", "--id", "BrettMayson.HEMTT", "-e"], label="winget install")
+
+    def _update_hemtt(self):
+        """Update/upgrade HEMTT via winget (BrettMayson.HEMTT)."""
+        self._run_winget(["upgrade", "--id", "BrettMayson.HEMTT", "-e"], label="winget upgrade")
+
+    def _run_winget(self, winget_args: list[str], label: str):
+        """Run a winget command and stream output to the console.
+
+        Parameters
+        ----------
+        winget_args: list[str]
+            Arguments after 'winget'. Example: ['install', '--id', 'BrettMayson.HEMTT', '-e']
+        label: str
+            Short label for status bar.
+        """
+        # Clear output
+        self.output.configure(state=tk.NORMAL)
+        self.output.delete(1.0, tk.END)
+        self.output.configure(state=tk.DISABLED)
+
+        cmd = ["winget"] + winget_args
+        self._set_running(True, " ".join(cmd))
+
+        self.runner = CommandRunner(
+            command=cmd,
+            cwd=os.getcwd(),
+            on_output=self._enqueue_output,
+            on_exit=self._on_command_exit,
+        )
+        self.runner.start()
 
     def _run_launch(self):
         """Open launch dialog and run hemtt launch with selected options."""
