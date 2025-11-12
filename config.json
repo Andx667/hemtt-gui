@@ -1,7 +1,8 @@
 {
   "hemtt_path": "hemtt",
   "project_dir": "C:/Users/andyb/Workspace/ttt_pm",
-  "dark_mode": false,
+  "arma3_executable": "C:/Program Files (x86)/Steam/steamapps/common/Arma 3/arma3_x64.exe",
+  "dark_mode": true,
   "verbose": false,
-  "pedantic": false
+  "pedantic": true
 }
