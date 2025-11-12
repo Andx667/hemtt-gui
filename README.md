@@ -73,8 +73,6 @@ Trigger it by publishing a new Release in GitHub (or run manually via the Action
 
 - No progress bar (HEMTT doesn't emit structured progress; could parse lines heuristically).
 - Could support a list of favorite custom commands.
-- Could integrate a settings dialog and log file export.
-- Add dark theme toggle.
 
 ## Troubleshooting
 

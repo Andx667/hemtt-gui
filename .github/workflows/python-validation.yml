@@ -1,0 +1,92 @@
+name: Python Code Validation
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ['3.9', '3.10', '3.11', '3.12']
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8 pylint mypy
+
+      - name: Check Python syntax
+        run: |
+          python -m py_compile hemtt_gui.py
+          python -m py_compile command_runner.py
+          python -m py_compile config_store.py
+          python -m py_compile tests.py
+
+      - name: Lint with flake8
+        run: |
+          # Stop the build if there are Python syntax errors or undefined names
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          # Exit-zero treats all errors as warnings
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+        continue-on-error: true
+
+      - name: Type check with mypy
+        run: |
+          mypy hemtt_gui.py command_runner.py config_store.py --ignore-missing-imports
+        continue-on-error: true
+
+      - name: Run unit tests
+        run: |
+          python -m unittest discover -s . -p 'tests.py'
+
+      - name: Test GUI import (Linux/macOS)
+        if: runner.os != 'Windows'
+        run: |
+          python -c "import tkinter; print('Tkinter available:', tkinter.TkVersion)"
+        continue-on-error: true
+
+      - name: Test GUI import (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          python -c "import tkinter; print('Tkinter available:', tkinter.TkVersion)"
+
+  lint-report:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install linting tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install pylint flake8
+
+      - name: Generate pylint report
+        run: |
+          pylint hemtt_gui.py command_runner.py config_store.py --exit-zero > pylint-report.txt || true
+          cat pylint-report.txt
+
+      - name: Upload pylint report
+        uses: actions/upload-artifact@v4
+        with:
+          name: pylint-report
+          path: pylint-report.txt
