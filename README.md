@@ -5,7 +5,7 @@ A lightweight cross-platform (Windows-focused) Tkinter GUI wrapper for the `hemt
 ## Features
 
 - Run common commands: `hemtt build`, `hemtt release`, `hemtt ln sort` via buttons.
-- Run arbitrary custom command arguments (e.g. `validate`, `package --dry-run`).
+- Run arbitrary custom command arguments (e.g. `validate`).
 - Live streaming output pane with scrolling.
 - Cancel running command.
 - Select `hemtt` executable and project directory; persisted locally to `config.json`.
