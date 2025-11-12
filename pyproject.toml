@@ -1,0 +1,25 @@
+[tool.ruff]
+line-length = 100
+exclude = ["dist", "build", "__pycache__", ".venv"]
+select = ["E", "F", "I", "B", "UP"]
+ignore = ["E501"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
+skip-magic-trailing-comma = false
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
+[tool.mypy]
+python_version = 3.11
+ignore_missing_imports = true
+warn_unused_ignores = true
+warn_return_any = true
+warn_unreachable = true
+strict_optional = true
+check_untyped_defs = true
+warn_no_return = true
