@@ -3,11 +3,10 @@ import queue
 import shutil
 import time
 import tkinter as tk
-from tkinter import filedialog, messagebox, ttk
-from tkinter import scrolledtext
+from tkinter import filedialog, messagebox, scrolledtext, ttk
 
-from config_store import load_config, save_config
 from command_runner import CommandRunner, build_command
+from config_store import load_config, save_config
 
 APP_TITLE = "HEMTT GUI"
 

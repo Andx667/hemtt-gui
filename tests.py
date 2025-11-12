@@ -4,6 +4,7 @@ import unittest
 from command_runner import build_command
 from config_store import get_config_path, load_config, save_config
 
+
 class TestHemttGUIHelpers(unittest.TestCase):
     def test_build_command(self):
         cmd = build_command("hemtt", ["build"])  # type: ignore[arg-type]
