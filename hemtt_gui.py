@@ -67,14 +67,27 @@ class HemttGUI(tk.Tk):
 
         self.btn_build = ttk.Button(btns, text="hemtt build", command=self._run_build)
         self.btn_release = ttk.Button(btns, text="hemtt release", command=self._run_release)
+        self.btn_check = ttk.Button(btns, text="hemtt check", command=self._run_check)
         self.btn_ln_sort = ttk.Button(btns, text="hemtt ln sort", command=self._run_ln_sort)
         self.btn_cancel = ttk.Button(btns, text="Cancel", command=self._cancel_run)
         self.btn_cancel.state(["disabled"])  # disabled by default
 
         self.btn_build.pack(side=tk.LEFT, padx=(0, 8))
         self.btn_release.pack(side=tk.LEFT, padx=(0, 8))
+        self.btn_check.pack(side=tk.LEFT, padx=(0, 8))
         self.btn_ln_sort.pack(side=tk.LEFT, padx=(0, 8))
         self.btn_cancel.pack(side=tk.LEFT)
+
+        # Options frame
+        opts = ttk.Frame(self, padding=(8, 8))
+        opts.pack(fill=tk.X)
+        ttk.Label(opts, text="Options:").pack(side=tk.LEFT, padx=(0, 8))
+        self.verbose_var = tk.BooleanVar(value=False)
+        self.verbose_check = ttk.Checkbutton(opts, text="Verbose (-v)", variable=self.verbose_var)
+        self.verbose_check.pack(side=tk.LEFT, padx=(0, 8))
+        self.pedantic_var = tk.BooleanVar(value=False)
+        self.pedantic_check = ttk.Checkbutton(opts, text="Pedantic (-p)", variable=self.pedantic_var)
+        self.pedantic_check.pack(side=tk.LEFT)
 
         # Custom command
         custom = ttk.Frame(self, padding=8)
@@ -154,7 +167,7 @@ class HemttGUI(tk.Tk):
 
     def _set_running(self, running: bool, command_str: str | None = None):
         self.running = running
-        widgets = [self.btn_build, self.btn_release, self.btn_ln_sort, self.btn_custom, self.custom_entry]
+        widgets = [self.btn_build, self.btn_release, self.btn_check, self.btn_ln_sort, self.btn_custom, self.custom_entry, self.verbose_check, self.pedantic_check]
         for w in widgets:
             if running:
                 w.state(["disabled"])  # type: ignore[attr-defined]
@@ -202,7 +215,14 @@ class HemttGUI(tk.Tk):
         self.output.configure(state=tk.DISABLED)
         self._persist_config()
 
-        cmd = build_command(hemtt, args)
+        # Add verbose and pedantic flags if enabled
+        full_args = args.copy()
+        if self.verbose_var.get():
+            full_args.append("-v")
+        if self.pedantic_var.get():
+            full_args.append("-p")
+
+        cmd = build_command(hemtt, full_args)
         self.current_command = cmd
         self._set_running(True, " ".join(cmd))
 
@@ -231,6 +251,9 @@ class HemttGUI(tk.Tk):
     def _run_release(self):
         self._run(["release"]) 
 
+    def _run_check(self):
+        self._run(["check"]) 
+
     def _run_ln_sort(self):
         # The user requested 'hemtt ln sort'
         self._run(["ln", "sort"]) 
@@ -238,7 +261,7 @@ class HemttGUI(tk.Tk):
     def _run_custom(self):
         extra = self.custom_var.get().strip()
         if not extra:
-            messagebox.showinfo(APP_TITLE, "Enter custom arguments, e.g. 'validate' or 'package --dry-run'")
+            messagebox.showinfo(APP_TITLE, "Enter custom arguments, e.g. 'validate'")
             return
         args = [a for a in extra.split(" ") if a]
         self._run(args)
