@@ -1,4 +1,4 @@
-# HEMTT GUI
+# GUI 4 HEMTT
 
 A lightweight cross-platform (Windows-focused) Tkinter GUI wrapper for the `hemtt` CLI tool.
 
@@ -136,3 +136,4 @@ Trigger it by publishing a new Release in GitHub (or run manually via the Action
 ## License
 
 [MIT LICENSE](LICENSE)
+
