@@ -131,58 +131,101 @@ class HemttGUI(tk.Tk):
         self.btn_utils_fnl.pack(side=tk.LEFT, padx=(0, 8))
         self.btn_book.pack(side=tk.LEFT)
 
-        # Options frame
-        opts_frame = ttk.LabelFrame(self, text="Build/Dev Options", padding=(8, 8))
-        opts_frame.pack(fill=tk.X, padx=8, pady=(4, 0))
+        # Options frame - General options (all commands)
+        general_frame = ttk.LabelFrame(self, text="General Options (All Commands)", padding=(8, 8))
+        general_frame.pack(fill=tk.X, padx=8, pady=(4, 0))
 
-        # Row 1 - General options
-        opts_row1 = ttk.Frame(opts_frame)
-        opts_row1.pack(fill=tk.X, pady=2)
+        general_row = ttk.Frame(general_frame)
+        general_row.pack(fill=tk.X, pady=2)
         self.verbose_var = tk.BooleanVar(value=False)
         self.verbose_check = ttk.Checkbutton(
-            opts_row1, text="Verbose (-v)", variable=self.verbose_var
+            general_row, text="Verbose (-v)", variable=self.verbose_var
         )
         self.verbose_check.pack(side=tk.LEFT, padx=(0, 8))
+
+        ttk.Label(general_row, text="Threads (-t):").pack(side=tk.LEFT, padx=(8, 4))
+        self.threads_var = tk.StringVar()
+        threads_spinbox = ttk.Spinbox(
+            general_row, from_=1, to=32, textvariable=self.threads_var, width=5
+        )
+        threads_spinbox.pack(side=tk.LEFT)
+
+        # Check command options
+        check_frame = ttk.LabelFrame(self, text="Check Options", padding=(8, 8))
+        check_frame.pack(fill=tk.X, padx=8, pady=(4, 0))
+
+        check_row = ttk.Frame(check_frame)
+        check_row.pack(fill=tk.X, pady=2)
         self.pedantic_var = tk.BooleanVar(value=False)
         self.pedantic_check = ttk.Checkbutton(
-            opts_row1, text="Pedantic (-p)", variable=self.pedantic_var
+            check_row, text="Pedantic (-p)", variable=self.pedantic_var
         )
         self.pedantic_check.pack(side=tk.LEFT, padx=(0, 8))
+
+        ttk.Label(check_row, text="Lints (-L):").pack(side=tk.LEFT, padx=(8, 4))
+        self.lints_var = tk.StringVar()
+        lints_entry = ttk.Entry(check_row, textvariable=self.lints_var, width=30)
+        lints_entry.pack(side=tk.LEFT)
+        ttk.Label(check_row, text="(comma-separated)").pack(side=tk.LEFT, padx=(4, 0))
+
+        # Dev/Build/Launch options
+        build_frame = ttk.LabelFrame(self, text="Dev/Build/Launch Options", padding=(8, 8))
+        build_frame.pack(fill=tk.X, padx=8, pady=(4, 0))
+
+        # Row 1 - Binarization and RAP options
+        build_row1 = ttk.Frame(build_frame)
+        build_row1.pack(fill=tk.X, pady=2)
         self.binarize_var = tk.BooleanVar(value=False)
         self.binarize_check = ttk.Checkbutton(
-            opts_row1, text="Binarize (--binarize)", variable=self.binarize_var
+            build_row1, text="Binarize (-b)", variable=self.binarize_var
         )
         self.binarize_check.pack(side=tk.LEFT, padx=(0, 8))
         self.no_rap_var = tk.BooleanVar(value=False)
         self.no_rap_check = ttk.Checkbutton(
-            opts_row1, text="No RAP (--no-rap)", variable=self.no_rap_var
+            build_row1, text="No Rap (--no-rap)", variable=self.no_rap_var
         )
         self.no_rap_check.pack(side=tk.LEFT, padx=(0, 8))
         self.all_optionals_var = tk.BooleanVar(value=False)
         self.all_optionals_check = ttk.Checkbutton(
-            opts_row1, text="All Optionals (-O)", variable=self.all_optionals_var
+            build_row1, text="All Optionals (-O)", variable=self.all_optionals_var
         )
         self.all_optionals_check.pack(side=tk.LEFT)
 
-        # Row 2 - Advanced options
-        opts_row2 = ttk.Frame(opts_frame)
-        opts_row2.pack(fill=tk.X, pady=2)
-        ttk.Label(opts_row2, text="Threads (-t):").pack(side=tk.LEFT, padx=(0, 4))
-        self.threads_var = tk.StringVar()
-        threads_spinbox = ttk.Spinbox(
-            opts_row2, from_=1, to=32, textvariable=self.threads_var, width=5
-        )
-        threads_spinbox.pack(side=tk.LEFT, padx=(0, 12))
-
-        ttk.Label(opts_row2, text="Optional addons (-o):").pack(side=tk.LEFT, padx=(0, 4))
+        # Row 2 - Optional addons and Just
+        build_row2 = ttk.Frame(build_frame)
+        build_row2.pack(fill=tk.X, pady=2)
+        ttk.Label(build_row2, text="Optional addons (-o):").pack(side=tk.LEFT, padx=(0, 4))
         self.optional_addons_var = tk.StringVar()
-        optional_entry = ttk.Entry(opts_row2, textvariable=self.optional_addons_var, width=20)
+        optional_entry = ttk.Entry(build_row2, textvariable=self.optional_addons_var, width=20)
         optional_entry.pack(side=tk.LEFT, padx=(0, 12))
 
-        ttk.Label(opts_row2, text="Just (--just):").pack(side=tk.LEFT, padx=(0, 4))
+        ttk.Label(build_row2, text="Just (--just):").pack(side=tk.LEFT, padx=(0, 4))
         self.just_var = tk.StringVar()
-        just_entry = ttk.Entry(opts_row2, textvariable=self.just_var, width=20)
+        just_entry = ttk.Entry(build_row2, textvariable=self.just_var, width=20)
         just_entry.pack(side=tk.LEFT)
+        ttk.Label(build_row2, text="(comma-separated)").pack(side=tk.LEFT, padx=(4, 0))
+
+        # Release options
+        release_frame = ttk.LabelFrame(self, text="Release Options", padding=(8, 8))
+        release_frame.pack(fill=tk.X, padx=8, pady=(4, 0))
+
+        release_row = ttk.Frame(release_frame)
+        release_row.pack(fill=tk.X, pady=2)
+        self.no_bin_var = tk.BooleanVar(value=False)
+        self.no_bin_check = ttk.Checkbutton(
+            release_row, text="No Binarize (--no-bin)", variable=self.no_bin_var
+        )
+        self.no_bin_check.pack(side=tk.LEFT, padx=(0, 8))
+        self.no_sign_var = tk.BooleanVar(value=False)
+        self.no_sign_check = ttk.Checkbutton(
+            release_row, text="No Sign (--no-sign)", variable=self.no_sign_var
+        )
+        self.no_sign_check.pack(side=tk.LEFT, padx=(0, 8))
+        self.no_archive_var = tk.BooleanVar(value=False)
+        self.no_archive_check = ttk.Checkbutton(
+            release_row, text="No Archive (--no-archive)", variable=self.no_archive_var
+        )
+        self.no_archive_check.pack(side=tk.LEFT)
 
         # Utility buttons frame
         util_btns = ttk.Frame(self, padding=(8, 4))
@@ -570,6 +613,9 @@ class HemttGUI(tk.Tk):
             self.binarize_check,
             self.no_rap_check,
             self.all_optionals_check,
+            self.no_bin_check,
+            self.no_sign_check,
+            self.no_archive_check,
         ]
         for w in widgets:
             if running:
@@ -614,7 +660,7 @@ class HemttGUI(tk.Tk):
         return hemtt, proj
 
     def _run(
-        self, args: list[str], supports_pedantic: bool = True, supports_build_opts: bool = False
+        self, args: list[str], command_type: str = "other"
     ):
         """Start running a HEMTT command with optional flags.
 
@@ -622,10 +668,8 @@ class HemttGUI(tk.Tk):
         ----------
         args: list[str]
             Arguments after the 'hemtt' executable (e.g., ["build"]).
-        supports_pedantic: bool
-            Whether to append the '-p' flag when the pedantic option is set.
-        supports_build_opts: bool
-            Whether to append build/dev options like --binarize, --no-rap, etc.
+        command_type: str
+            Type of command: "check", "dev", "build", "launch", "release", or "other".
         """
         validated = self._validated_paths()
         if not validated:
@@ -638,26 +682,38 @@ class HemttGUI(tk.Tk):
         self.output.configure(state=tk.DISABLED)
         self._persist_config()
 
-        # Add verbose and pedantic flags if enabled
+        # Start building command arguments
         full_args = args.copy()
+
+        # Add global options (all commands support these)
         if self.verbose_var.get():
             full_args.append("-v")
-        if supports_pedantic and self.pedantic_var.get():
-            full_args.append("-p")
 
-        # Add build/dev specific options
-        if supports_build_opts:
+        threads = self.threads_var.get().strip()
+        if threads:
+            full_args.extend(["-t", threads])
+
+        # Add command-specific options
+        if command_type == "check":
+            # Check-specific options
+            if self.pedantic_var.get():
+                full_args.append("-p")
+
+            lints = self.lints_var.get().strip()
+            if lints:
+                for lint in lints.split(","):
+                    lint = lint.strip()
+                    if lint:
+                        full_args.extend(["-L", lint])
+
+        elif command_type in ["dev", "build", "launch"]:
+            # Dev/Build/Launch options
             if self.binarize_var.get():
-                full_args.append("--binarize")
+                full_args.append("-b")
             if self.no_rap_var.get():
                 full_args.append("--no-rap")
             if self.all_optionals_var.get():
-                full_args.append("--all-optionals")
-
-            # Add threads option
-            threads = self.threads_var.get().strip()
-            if threads:
-                full_args.extend(["--threads", threads])
+                full_args.append("-O")
 
             # Add optional addons
             optionals = self.optional_addons_var.get().strip()
@@ -665,15 +721,27 @@ class HemttGUI(tk.Tk):
                 for opt in optionals.split(","):
                     opt = opt.strip()
                     if opt:
-                        full_args.extend(["--optional", opt])
+                        full_args.extend(["-o", opt])
 
-            # Add just option
-            just = self.just_var.get().strip()
-            if just:
-                for j in just.split(","):
-                    j = j.strip()
-                    if j:
-                        full_args.extend(["--just", j])
+            # Add just option (dev and build support this)
+            if command_type in ["dev", "build"]:
+                just = self.just_var.get().strip()
+                if just:
+                    for j in just.split(","):
+                        j = j.strip()
+                        if j:
+                            full_args.extend(["--just", j])
+
+        elif command_type == "release":
+            # Release-specific options
+            if self.no_bin_var.get():
+                full_args.append("--no-bin")
+            if self.no_rap_var.get():
+                full_args.append("--no-rap")
+            if self.no_sign_var.get():
+                full_args.append("--no-sign")
+            if self.no_archive_var.get():
+                full_args.append("--no-archive")
 
         cmd = build_command(hemtt, full_args)
         self._set_running(True, " ".join(cmd))
@@ -701,31 +769,31 @@ class HemttGUI(tk.Tk):
     # Button handlers
     def _run_build(self):
         """Run 'hemtt build'."""
-        self._run(["build"], supports_pedantic=True, supports_build_opts=True)
+        self._run(["build"], command_type="build")
 
     def _run_release(self):
         """Run 'hemtt release'."""
-        self._run(["release"], supports_pedantic=True, supports_build_opts=True)
+        self._run(["release"], command_type="release")
 
     def _run_check(self):
         """Run 'hemtt check'."""
-        self._run(["check"], supports_pedantic=True, supports_build_opts=True)
+        self._run(["check"], command_type="check")
 
     def _run_dev(self):
         """Run 'hemtt dev'."""
-        self._run(["dev"], supports_pedantic=True, supports_build_opts=True)
+        self._run(["dev"], command_type="dev")
 
     def _run_utils_fnl(self):
         """Run 'hemtt utils fnl'."""
-        self._run(["utils", "fnl"], supports_pedantic=False)
+        self._run(["utils", "fnl"], command_type="other")
 
     def _run_ln_sort(self):
         """Run 'hemtt ln sort'."""
-        self._run(["ln", "sort"], supports_pedantic=False)
+        self._run(["ln", "sort"], command_type="other")
 
     def _run_ln_coverage(self):
         """Run 'hemtt ln coverage'."""
-        self._run(["ln", "coverage"], supports_pedantic=False)
+        self._run(["ln", "coverage"], command_type="other")
 
     def _run_custom(self):
         """Run a custom argument list typed by the user after 'hemtt'."""
@@ -734,8 +802,7 @@ class HemttGUI(tk.Tk):
             messagebox.showinfo(APP_TITLE, "Enter custom arguments, e.g. 'validate'")
             return
         args = [a for a in extra.split(" ") if a]
-        # Pedantic (-p) is only supported for build, check, dev, release
-        self._run(args, supports_pedantic=False)
+        self._run(args, command_type="other")
 
     def _install_hemtt(self):
         """Install HEMTT via winget (BrettMayson.HEMTT)."""
@@ -778,7 +845,7 @@ class HemttGUI(tk.Tk):
         self.wait_window(dialog)
         if dialog.result:
             args = ["launch"] + dialog.result
-            self._run(args, supports_pedantic=False)
+            self._run(args, command_type="launch")
 
     def _open_book(self):
         """Open the HEMTT documentation in the default web browser."""
@@ -829,32 +896,39 @@ class LaunchDialog(tk.Toplevel):
 
         self.quick_var = tk.BooleanVar(value=False)
         ttk.Checkbutton(
-            options_frame, text="Quick launch (--quick, skip build)", variable=self.quick_var
+            options_frame, text="Quick launch (-Q, skip build)", variable=self.quick_var
         ).pack(anchor=tk.W, pady=2)
 
         self.no_filepatching_var = tk.BooleanVar(value=False)
         ttk.Checkbutton(
             options_frame,
-            text="Disable file patching (--no-filepatching)",
+            text="Disable file patching (-F)",
             variable=self.no_filepatching_var,
         ).pack(anchor=tk.W, pady=2)
 
         self.binarize_var = tk.BooleanVar(value=False)
         ttk.Checkbutton(
-            options_frame, text="Binarize files (--binarize)", variable=self.binarize_var
+            options_frame, text="Binarize files (-b)", variable=self.binarize_var
         ).pack(anchor=tk.W, pady=2)
 
         self.all_optionals_var = tk.BooleanVar(value=False)
         ttk.Checkbutton(
             options_frame,
-            text="Include all optionals (--all-optionals)",
+            text="Include all optionals (-O)",
             variable=self.all_optionals_var,
+        ).pack(anchor=tk.W, pady=2)
+
+        self.no_rap_var = tk.BooleanVar(value=False)
+        ttk.Checkbutton(
+            options_frame,
+            text="No RAP (--no-rap)",
+            variable=self.no_rap_var,
         ).pack(anchor=tk.W, pady=2)
 
         # Executable
         exec_frame = ttk.Frame(options_frame)
         exec_frame.pack(fill=tk.X, pady=5)
-        ttk.Label(exec_frame, text="Executable:").pack(side=tk.LEFT)
+        ttk.Label(exec_frame, text="Executable (-e):").pack(side=tk.LEFT)
         self.executable_var = tk.StringVar(value=default_arma3_exec)
         exec_entry = ttk.Entry(exec_frame, textvariable=self.executable_var, width=20)
         exec_entry.pack(side=tk.LEFT, padx=5)
@@ -865,7 +939,7 @@ class LaunchDialog(tk.Toplevel):
         # Instances
         inst_frame = ttk.Frame(options_frame)
         inst_frame.pack(fill=tk.X, pady=2)
-        ttk.Label(inst_frame, text="Instances:").pack(side=tk.LEFT)
+        ttk.Label(inst_frame, text="Instances (-i):").pack(side=tk.LEFT)
         self.instances_var = tk.StringVar(value="1")
         inst_spinbox = ttk.Spinbox(
             inst_frame, from_=1, to=10, textvariable=self.instances_var, width=5
@@ -878,7 +952,7 @@ class LaunchDialog(tk.Toplevel):
         # Optional addons
         optional_frame = ttk.Frame(options_frame)
         optional_frame.pack(fill=tk.X, pady=5)
-        ttk.Label(optional_frame, text="Optional addons:").pack(side=tk.LEFT)
+        ttk.Label(optional_frame, text="Optional addons (-o):").pack(side=tk.LEFT)
         self.optional_var = tk.StringVar()
         optional_entry = ttk.Entry(optional_frame, textvariable=self.optional_var, width=30)
         optional_entry.pack(side=tk.LEFT, padx=5)
@@ -924,25 +998,27 @@ class LaunchDialog(tk.Toplevel):
         if profile and profile != "default":
             args.append(profile)
 
-        # Add options
+        # Add options using correct short flags where available
         if self.quick_var.get():
-            args.append("--quick")
+            args.append("-Q")
         if self.no_filepatching_var.get():
-            args.append("--no-filepatching")
+            args.append("-F")
         if self.binarize_var.get():
-            args.append("--binarize")
+            args.append("-b")
         if self.all_optionals_var.get():
-            args.append("--all-optionals")
+            args.append("-O")
+        if self.no_rap_var.get():
+            args.append("--no-rap")
 
         # Add executable
         executable = self.executable_var.get().strip()
         if executable:
-            args.extend(["--executable", executable])
+            args.extend(["-e", executable])
 
         # Add instances
         instances = self.instances_var.get().strip()
         if instances and instances != "1":
-            args.extend(["--instances", instances])
+            args.extend(["-i", instances])
 
         # Add optional addons
         optionals = self.optional_var.get().strip()
@@ -950,7 +1026,7 @@ class LaunchDialog(tk.Toplevel):
             for opt in optionals.split(","):
                 opt = opt.strip()
                 if opt:
-                    args.extend(["--optional", opt])
+                    args.extend(["-o", opt])
 
         # Add extra arguments (passthrough after --)
         extra = self.extra_args_var.get().strip()
