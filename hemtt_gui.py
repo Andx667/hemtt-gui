@@ -659,9 +659,7 @@ class HemttGUI(tk.Tk):
                     return None
         return hemtt, proj
 
-    def _run(
-        self, args: list[str], command_type: str = "other"
-    ):
+    def _run(self, args: list[str], command_type: str = "other"):
         """Start running a HEMTT command with optional flags.
 
         Parameters
@@ -907,9 +905,9 @@ class LaunchDialog(tk.Toplevel):
         ).pack(anchor=tk.W, pady=2)
 
         self.binarize_var = tk.BooleanVar(value=False)
-        ttk.Checkbutton(
-            options_frame, text="Binarize files (-b)", variable=self.binarize_var
-        ).pack(anchor=tk.W, pady=2)
+        ttk.Checkbutton(options_frame, text="Binarize files (-b)", variable=self.binarize_var).pack(
+            anchor=tk.W, pady=2
+        )
 
         self.all_optionals_var = tk.BooleanVar(value=False)
         ttk.Checkbutton(
