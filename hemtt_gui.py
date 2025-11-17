@@ -672,7 +672,7 @@ class HemttGUI(tk.Tk):
         """Open build dialog and run hemtt build with selected options."""
         dialog = BuildDialog(self)
         self.wait_window(dialog)
-        if dialog.result:
+        if dialog.result is not None:
             args = ["build"] + dialog.result
             self._run(args, command_type="build")
 
@@ -680,7 +680,7 @@ class HemttGUI(tk.Tk):
         """Open release dialog and run hemtt release with selected options."""
         dialog = ReleaseDialog(self)
         self.wait_window(dialog)
-        if dialog.result:
+        if dialog.result is not None:
             args = ["release"] + dialog.result
             self._run(args, command_type="release")
 
@@ -688,7 +688,7 @@ class HemttGUI(tk.Tk):
         """Open check dialog and run hemtt check with selected options."""
         dialog = CheckDialog(self)
         self.wait_window(dialog)
-        if dialog.result:
+        if dialog.result is not None:
             args = ["check"] + dialog.result
             self._run(args, command_type="check")
 
@@ -696,7 +696,7 @@ class HemttGUI(tk.Tk):
         """Open dev dialog and run hemtt dev with selected options."""
         dialog = DevDialog(self)
         self.wait_window(dialog)
-        if dialog.result:
+        if dialog.result is not None:
             args = ["dev"] + dialog.result
             self._run(args, command_type="dev")
 
@@ -760,7 +760,7 @@ class HemttGUI(tk.Tk):
         arma3_exec = self.arma3_var.get().strip()
         dialog = LaunchDialog(self, arma3_exec)
         self.wait_window(dialog)
-        if dialog.result:
+        if dialog.result is not None:
             args = ["launch"] + dialog.result
             self._run(args, command_type="launch")
 
