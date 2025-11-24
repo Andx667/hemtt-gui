@@ -253,22 +253,6 @@ class HemttGUI(TkinterDnD.Tk if HAS_DND else tk.Tk):  # type: ignore
             "Remove UTF-8 BOM markers from files\nFixes parsing issues caused by Byte Order Marks",
         )
 
-        self.btn_pbo_inspect = ttk.Button(
-            btns2, text="hemtt pbo inspect ⓘ", command=self._run_pbo_inspect
-        )
-        self._create_tooltip(
-            self.btn_pbo_inspect,
-            "Inspect a PBO file\nShows PBO properties and contents in various formats",
-        )
-
-        self.btn_pbo_unpack = ttk.Button(
-            btns2, text="hemtt pbo unpack ⓘ", command=self._run_pbo_unpack
-        )
-        self._create_tooltip(
-            self.btn_pbo_unpack,
-            "Unpack a PBO file\nExtracts PBO contents with optional derapification",
-        )
-
         self.btn_book = ttk.Button(btns2, text="hemtt book ⓘ", command=self._open_book)
         self._create_tooltip(
             self.btn_book, "Open HEMTT documentation\nOpens hemtt.dev in your browser"
@@ -278,9 +262,48 @@ class HemttGUI(TkinterDnD.Tk if HAS_DND else tk.Tk):  # type: ignore
         self.btn_ln_coverage.pack(side=tk.LEFT, padx=(0, 8))
         self.btn_utils_fnl.pack(side=tk.LEFT, padx=(0, 8))
         self.btn_utils_bom.pack(side=tk.LEFT, padx=(0, 8))
-        self.btn_pbo_inspect.pack(side=tk.LEFT, padx=(0, 8))
-        self.btn_pbo_unpack.pack(side=tk.LEFT, padx=(0, 8))
         self.btn_book.pack(side=tk.LEFT)
+
+        # Third row for PAA/PBO utility buttons
+        btns3 = ttk.Frame(self, padding=(8, 4))
+        btns3.pack(fill=tk.X)
+
+        self.btn_paa_convert = ttk.Button(
+            btns3, text="hemtt paa convert ⓘ", command=self._run_paa_convert
+        )
+        self._create_tooltip(
+            self.btn_paa_convert,
+            "Convert image to/from PAA format\nSupports PNG, JPEG, BMP, etc.",
+        )
+
+        self.btn_paa_inspect = ttk.Button(
+            btns3, text="hemtt paa inspect ⓘ", command=self._run_paa_inspect
+        )
+        self._create_tooltip(
+            self.btn_paa_inspect,
+            "Inspect a PAA file\nShows PAA properties in various formats",
+        )
+
+        self.btn_pbo_inspect = ttk.Button(
+            btns3, text="hemtt pbo inspect ⓘ", command=self._run_pbo_inspect
+        )
+        self._create_tooltip(
+            self.btn_pbo_inspect,
+            "Inspect a PBO file\nShows PBO properties and contents in various formats",
+        )
+
+        self.btn_pbo_unpack = ttk.Button(
+            btns3, text="hemtt pbo unpack ⓘ", command=self._run_pbo_unpack
+        )
+        self._create_tooltip(
+            self.btn_pbo_unpack,
+            "Unpack a PBO file\nExtracts PBO contents with optional derapification",
+        )
+
+        self.btn_paa_convert.pack(side=tk.LEFT, padx=(0, 8))
+        self.btn_paa_inspect.pack(side=tk.LEFT, padx=(0, 8))
+        self.btn_pbo_inspect.pack(side=tk.LEFT, padx=(0, 8))
+        self.btn_pbo_unpack.pack(side=tk.LEFT)
 
         # Separator with title for utility buttons
         util_separator_frame = ttk.Frame(self, padding=(8, 8, 8, 0))
@@ -792,6 +815,34 @@ class HemttGUI(TkinterDnD.Tk if HAS_DND else tk.Tk):  # type: ignore
         """Run 'hemtt ln coverage'."""
         self._run(["ln", "coverage"], command_type="other")
 
+    def _run_paa_convert(self):
+        """Open PAA convert dialog and run hemtt utils paa convert with selected files."""
+        dialog = PaaConvertDialog(self)
+        self.wait_window(dialog)
+        if dialog.result is not None:
+            args = ["utils", "paa", "convert"] + dialog.result
+            # Get the directory of the source file to use as working directory
+            src_file = dialog.result[0] if dialog.result else None
+            if src_file and os.path.isfile(src_file):
+                src_dir = os.path.dirname(os.path.abspath(src_file))
+                self._run(args, command_type="other", cwd=src_dir)
+            else:
+                self._run(args, command_type="other")
+
+    def _run_paa_inspect(self):
+        """Open PAA inspect dialog and run hemtt utils paa inspect with selected options."""
+        dialog = PaaInspectDialog(self)
+        self.wait_window(dialog)
+        if dialog.result is not None:
+            args = ["utils", "paa", "inspect"] + dialog.result
+            # Get the directory of the PAA file to use as working directory
+            paa_file = dialog.result[0] if dialog.result else None
+            if paa_file and os.path.isfile(paa_file):
+                paa_dir = os.path.dirname(os.path.abspath(paa_file))
+                self._run(args, command_type="other", cwd=paa_dir)
+            else:
+                self._run(args, command_type="other")
+
     def _run_pbo_inspect(self):
         """Open PBO inspect dialog and run hemtt utils pbo inspect with selected options."""
         dialog = PboInspectDialog(self)
@@ -1112,6 +1163,263 @@ class DevDialog(BaseCommandDialog):
         self._add_threads_to_args(args)
 
         self.result = args[1:]  # Remove "dev" since it's added by caller
+        self.destroy()
+
+
+class PaaConvertDialog(tk.Toplevel):
+    """Dialog for configuring hemtt utils paa convert options."""
+
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.title("HEMTT PAA Convert")
+        self.resizable(False, False)
+        self.result = None
+        self.parent = parent
+
+        self.transient(parent)
+        self.grab_set()
+
+        # Apply dark mode if parent is in dark mode
+        if parent.dark_mode:
+            self.configure(bg=parent.dark_theme["bg"])
+
+        # Source file selection
+        src_frame = ttk.LabelFrame(self, text="Source File (PAA or Image)", padding=10)
+        src_frame.pack(fill=tk.X, padx=10, pady=5)
+
+        self.src_var = tk.StringVar()
+        src_entry_frame = ttk.Frame(src_frame)
+        src_entry_frame.pack(fill=tk.X)
+        ttk.Entry(src_entry_frame, textvariable=self.src_var, width=50).pack(
+            side=tk.LEFT, fill=tk.X, expand=True
+        )
+        ttk.Button(src_entry_frame, text="Browse...", command=self._browse_src).pack(
+            side=tk.LEFT, padx=(5, 0)
+        )
+
+        # Destination file selection
+        dest_frame = ttk.LabelFrame(self, text="Destination File (PAA or Image)", padding=10)
+        dest_frame.pack(fill=tk.X, padx=10, pady=5)
+
+        self.dest_var = tk.StringVar()
+        dest_entry_frame = ttk.Frame(dest_frame)
+        dest_entry_frame.pack(fill=tk.X)
+        ttk.Entry(dest_entry_frame, textvariable=self.dest_var, width=50).pack(
+            side=tk.LEFT, fill=tk.X, expand=True
+        )
+        ttk.Button(dest_entry_frame, text="Browse...", command=self._browse_dest).pack(
+            side=tk.LEFT, padx=(5, 0)
+        )
+        ttk.Label(
+            dest_frame,
+            text="Supports: PNG, JPEG, BMP, PAA (detected by extension)",
+            font=("TkDefaultFont", 8),
+        ).pack(anchor=tk.W, pady=(5, 0))
+
+        # Buttons
+        btn_frame = ttk.Frame(self, padding=10)
+        btn_frame.pack(fill=tk.X)
+        ttk.Button(btn_frame, text="Convert", command=self._on_convert).pack(
+            side=tk.RIGHT, padx=(5, 0)
+        )
+        ttk.Button(btn_frame, text="Cancel", command=self._on_cancel).pack(side=tk.RIGHT)
+
+        self._center_on_parent()
+        self._setup_dnd()
+
+    def _setup_dnd(self):
+        """Setup drag and drop for image/PAA files."""
+        if HAS_DND:
+            try:
+                self.drop_target_register(DND_FILES)  # type: ignore
+                self.dnd_bind("<<Drop>>", self._on_drop)  # type: ignore
+            except Exception:
+                pass
+
+    def _on_drop(self, event):
+        """Handle file drops."""
+        files = self.tk.splitlist(event.data)
+        if files:
+            file_path = files[0].strip("{}").strip()
+            # Set as source if empty, otherwise destination
+            if not self.src_var.get():
+                self.src_var.set(file_path)
+            elif not self.dest_var.get():
+                self.dest_var.set(file_path)
+
+    def _browse_src(self):
+        """Open file dialog to select source file."""
+        filename = filedialog.askopenfilename(
+            parent=self,
+            title="Select source file",
+            filetypes=[
+                ("PAA files", "*.paa"),
+                ("Image files", "*.png;*.jpg;*.jpeg;*.bmp;*.tga"),
+                ("All files", "*.*"),
+            ],
+        )
+        if filename:
+            self.src_var.set(filename)
+
+    def _browse_dest(self):
+        """Open file dialog to select destination file."""
+        filename = filedialog.asksaveasfilename(
+            parent=self,
+            title="Select destination file",
+            filetypes=[
+                ("PAA files", "*.paa"),
+                ("PNG files", "*.png"),
+                ("JPEG files", "*.jpg;*.jpeg"),
+                ("BMP files", "*.bmp"),
+                ("All files", "*.*"),
+            ],
+        )
+        if filename:
+            self.dest_var.set(filename)
+
+    def _center_on_parent(self):
+        """Center the dialog on the parent window."""
+        self.update_idletasks()
+        x = self.parent.winfo_x() + (self.parent.winfo_width() - self.winfo_width()) // 2
+        y = self.parent.winfo_y() + (self.parent.winfo_height() - self.winfo_height()) // 2
+        self.geometry(f"+{x}+{y}")
+
+    def _on_convert(self):
+        """Validate inputs and build command arguments."""
+        src_file = self.src_var.get().strip()
+        dest_file = self.dest_var.get().strip()
+
+        if not src_file:
+            messagebox.showerror("Error", "Please select a source file", parent=self)
+            return
+        if not dest_file:
+            messagebox.showerror("Error", "Please select a destination file", parent=self)
+            return
+
+        self.result = [src_file, dest_file]
+        self.destroy()
+
+    def _on_cancel(self):
+        """Cancel the dialog without setting result."""
+        self.result = None
+        self.destroy()
+
+
+class PaaInspectDialog(tk.Toplevel):
+    """Dialog for configuring hemtt utils paa inspect options."""
+
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.title("HEMTT PAA Inspect")
+        self.resizable(False, False)
+        self.result = None
+        self.parent = parent
+
+        self.transient(parent)
+        self.grab_set()
+
+        # Apply dark mode if parent is in dark mode
+        if parent.dark_mode:
+            self.configure(bg=parent.dark_theme["bg"])
+
+        # PAA file selection
+        paa_frame = ttk.LabelFrame(self, text="PAA File", padding=10)
+        paa_frame.pack(fill=tk.X, padx=10, pady=5)
+
+        self.paa_var = tk.StringVar()
+        paa_entry_frame = ttk.Frame(paa_frame)
+        paa_entry_frame.pack(fill=tk.X)
+        ttk.Entry(paa_entry_frame, textvariable=self.paa_var, width=50).pack(
+            side=tk.LEFT, fill=tk.X, expand=True
+        )
+        ttk.Button(paa_entry_frame, text="Browse...", command=self._browse_paa).pack(
+            side=tk.LEFT, padx=(5, 0)
+        )
+
+        # Format selection
+        format_frame = ttk.LabelFrame(self, text="Output Format", padding=10)
+        format_frame.pack(fill=tk.X, padx=10, pady=5)
+
+        self.format_var = tk.StringVar(value="ascii")
+        format_options = [
+            ("ASCII Table (default)", "ascii"),
+            ("JSON (compact)", "json"),
+            ("Pretty JSON", "pretty-json"),
+            ("Markdown Table", "markdown"),
+        ]
+        
+        for text, value in format_options:
+            ttk.Radiobutton(
+                format_frame, text=text, variable=self.format_var, value=value
+            ).pack(anchor=tk.W, pady=2)
+
+        # Buttons
+        btn_frame = ttk.Frame(self, padding=10)
+        btn_frame.pack(fill=tk.X)
+        ttk.Button(btn_frame, text="Inspect", command=self._on_inspect).pack(
+            side=tk.RIGHT, padx=(5, 0)
+        )
+        ttk.Button(btn_frame, text="Cancel", command=self._on_cancel).pack(side=tk.RIGHT)
+
+        self._center_on_parent()
+        self._setup_paa_dnd()
+
+    def _setup_paa_dnd(self):
+        """Setup drag and drop for PAA files."""
+        if HAS_DND:
+            try:
+                self.drop_target_register(DND_FILES)  # type: ignore
+                self.dnd_bind("<<Drop>>", self._on_paa_drop)  # type: ignore
+            except Exception:
+                pass
+
+    def _on_paa_drop(self, event):
+        """Handle PAA file drops."""
+        files = self.tk.splitlist(event.data)
+        if files:
+            file_path = files[0].strip("{}").strip()
+            if file_path.lower().endswith(".paa"):
+                self.paa_var.set(file_path)
+            else:
+                messagebox.showwarning("Invalid File", "Please drop a .paa file", parent=self)
+
+    def _browse_paa(self):
+        """Open file dialog to select a PAA file."""
+        filename = filedialog.askopenfilename(
+            parent=self,
+            title="Select PAA file",
+            filetypes=[("PAA files", "*.paa"), ("All files", "*.*")],
+        )
+        if filename:
+            self.paa_var.set(filename)
+
+    def _center_on_parent(self):
+        """Center the dialog on the parent window."""
+        self.update_idletasks()
+        x = self.parent.winfo_x() + (self.parent.winfo_width() - self.winfo_width()) // 2
+        y = self.parent.winfo_y() + (self.parent.winfo_height() - self.winfo_height()) // 2
+        self.geometry(f"+{x}+{y}")
+
+    def _on_inspect(self):
+        """Validate inputs and build command arguments."""
+        paa_file = self.paa_var.get().strip()
+        if not paa_file:
+            messagebox.showerror("Error", "Please select a PAA file", parent=self)
+            return
+
+        args = [paa_file]
+
+        # Add format option if not default
+        format_choice = self.format_var.get()
+        if format_choice != "ascii":
+            args.extend(["--format", format_choice])
+
+        self.result = args
+        self.destroy()
+
+    def _on_cancel(self):
+        """Cancel the dialog without setting result."""
+        self.result = None
         self.destroy()
 
 
